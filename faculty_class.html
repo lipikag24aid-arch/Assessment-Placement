@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">CLASS DASHBOARD</p><h1>{{ c['name'] }}</h1>
+<p class="muted">Students join with this code at registration or on the <b>Class</b> page:</p><div class="code-pill big">{{ c['code'] }}</div></div>
+<div class="qr-box">{% if live_session %}<p><b>Session running</b><br><span class="muted small">{{ live_session['expires_at'][11:16] }} expiry</span></p><a class="button" href="{{ url_for('session_view',class_id=c['id'],sid=live_session['id']) }}">Show QR</a>{% else %}<p class="muted small">Start a session to get a fresh QR code for today's class.</p>{% endif %}
+<form method="post" action="{{ url_for('session_start',class_id=c['id']) }}" style="margin-top:8px"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<select name="minutes" style="width:auto"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="120">2 hours</option></select>
+<button>{{ 'New QR code' if live_session else 'Start session' }}</button></form></div>
+<div class="actions"><a class="button" href="{{ url_for('faculty_export',class_id=c['id']) }}">Export CSV</a>
+<label class="live"><input type="checkbox" id="live" checked style="width:auto"> Auto-refresh (30s)</label></div></div>
+
+<div class="grid three">
+<div class="card stat"><span>Students joined</span><strong>{{ s['students'] }}</strong></div>
+<div class="card stat"><span>Self assessment done</span><strong>{{ s['self_done'] }} / {{ s['students'] }}</strong></div>
+<div class="card stat"><span>Placement done</span><strong>{{ s['placement_done'] }} / {{ s['students'] }}</strong></div>
+<div class="card stat"><span>Class avg wellness</span><strong>{{ s['avg_wellness'] if s['avg_wellness'] is not none else '--' }}{% if s['avg_wellness'] is not none %}%{% endif %}</strong></div>
+<div class="card stat"><span>Class avg placement</span><strong>{{ s['avg_placement'] if s['avg_placement'] is not none else '--' }}{% if s['avg_placement'] is not none %}%{% endif %}</strong></div>
+<div class="card stat"><span>Suggested follow-up</span><strong>{{ s['follow_up'] }}</strong></div>
+</div>
+
+{% if s['placement_done'] or s['self_done'] %}
+<div class="grid three">
+<div class="card"><h2>Stage averages</h2><canvas id="stageChart" height="220"></canvas></div>
+<div class="card"><h2>Readiness</h2><canvas id="readyChart" height="220"></canvas></div>
+<div class="card"><h2>Wellness levels</h2><canvas id="wellChart" height="220"></canvas></div>
+</div>
+{% endif %}
+
+<div class="card"><h2>Students</h2>
+<div class="table-scroll"><table>
+<tr><th>Student</th><th>Wellness</th><th>Level</th><th>Placement</th><th>Readiness</th>{% for st in stage_order %}<th>{{ st }}</th>{% endfor %}<th></th></tr>
+{% for r in rows %}
+<tr>
+<td><b>{{ r['name'] }}</b><br><span class="muted">{{ r['email'] }}</span></td>
+{% if r['w'] %}
+<td>{{ r['w']['wellness_percent'] }}%</td>
+<td><span class="tag {{ 'warn' if (r['w']['safety_flag'] or r['w']['level'] in ('High','Very High')) else 'ok' }}">{{ r['w']['level'] }}{% if r['w']['safety_flag'] %} · follow up{% endif %}</span></td>
+{% else %}<td class="muted">pending</td><td class="muted">pending</td>{% endif %}
+{% if r['p'] %}
+<td>{{ r['p']['score_percent'] }}%</td><td>{{ r['p']['level'] }}</td>
+{% for st in stage_order %}<td>{{ r['stages'].get(st,'–') }}{% if r['stages'].get(st) is not none %}%{% endif %}</td>{% endfor %}
+{% else %}<td class="muted">pending</td><td class="muted">pending</td>{% for st in stage_order %}<td>–</td>{% endfor %}{% endif %}
+<td><a href="{{ url_for('faculty_student',class_id=c['id'],student_id=r['id']) }}">Details</a></td>
+</tr>
+{% else %}<tr><td colspan="{{ 6 + stage_order|length }}">No students have joined yet. Share the code <b>{{ c['code'] }}</b>.</td></tr>{% endfor %}
+</table></div>
+<p class="muted">Each student's most recent attempt is shown. "Suggested follow-up" counts students with a High/Very High screening indicator or a non-zero answer to the safety question. It is a prompt to check in kindly, not a diagnosis.</p></div>
+
+<form method="post" action="{{ url_for('faculty_delete_class',class_id=c['id']) }}" onsubmit="return confirm('Delete this class? Students keep their own results.')">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button class="secondary danger">Delete class</button></form>
+
+<script>
+const stage={{ s['stage_avgs']|tojson }}, ready={{ s['readiness']|tojson }}, well={{ s['wellness_levels']|tojson }};
+const mk=(id,cfg)=>{const el=document.getElementById(id);if(el)new Chart(el,cfg);};
+mk('stageChart',{type:'bar',data:{labels:Object.keys(stage),datasets:[{label:'Avg accuracy (%)',data:Object.values(stage),backgroundColor:'#2563eb'}]},options:{scales:{y:{min:0,max:100}}}});
+mk('readyChart',{type:'doughnut',data:{labels:Object.keys(ready),datasets:[{data:Object.values(ready),backgroundColor:['#dc2626','#f59e0b','#2563eb','#16a34a']}]}});
+mk('wellChart',{type:'doughnut',data:{labels:Object.keys(well),datasets:[{data:Object.values(well),backgroundColor:['#16a34a','#f59e0b','#ea580c','#dc2626']}]}});
+const live=document.getElementById('live');
+setInterval(()=>{if(live.checked)location.reload();},30000);
+</script>
+{% endblock %}

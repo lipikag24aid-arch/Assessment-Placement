@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">STEP 2 OF 2 · TIMED PLACEMENT PRACTICE</p><h1>{{ language_name }} Placement Assessment</h1><p class="muted">{{ questions|length }} questions across Aptitude, {{ language_name }} Coding, Technical Interview and Group Discussion. Order is shuffled every attempt.</p></div><div class="timer" id="timer">60:00</div></div>
+<div class="progress-wrap"><div id="progress" class="progress"></div></div><p id="progressText" class="muted">0 / {{ questions|length }} answered</p>
+<form id="assessmentForm" method="post" action="{{ url_for('submit_placement') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="time_taken" id="time_taken">
+{% for factor,q,opts,correct_index in questions %}
+{% set qno = loop.index %}
+<div class="question card">
+<div class="qhead"><span>Question {{ loop.index }} of {{ questions|length }}</span><small>{{ factor }}</small></div>
+<h2>{{ q }}</h2>
+<div class="options">
+{% for opt in opts %}<label class="option"><input type="radio" name="q{{ qno }}" value="{{ loop.index0 }}"><span>{{ opt }}</span></label>{% endfor %}
+</div>
+</div>
+{% endfor %}
+<button class="full">Submit Assessment</button>
+</form>
+<script>
+let seconds={{ seconds }}, total={{ questions|length }};
+const start=Date.now(), timer=document.getElementById('timer'), form=document.getElementById('assessmentForm');
+function missing(){const m=[];for(let i=1;i<=total;i++){if(!document.querySelector('input[name=q'+i+']:checked'))m.push(i);}return m;}
+function tick(){let m=Math.floor(seconds/60),s=seconds%60;timer.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+ if(seconds<=0){clearInterval(iv);document.getElementById('time_taken').value={{ seconds }};
+  const mi=missing();if(mi.length){timer.textContent='Time up';alert('Time is up. Please answer the remaining questions: '+mi.join(', '));}else{form.requestSubmit();}}
+ else seconds--;}
+const iv=setInterval(tick,1000);tick();
+document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',()=>{
+ const a=new Set([...document.querySelectorAll('input[type=radio]:checked')].map(x=>x.name)).size;
+ document.getElementById('progress').style.width=(a/total*100)+'%';
+ document.getElementById('progressText').textContent=a+' / '+total+' answered';
+}));
+form.addEventListener('submit',(e)=>{
+ const mi=missing();if(mi.length){e.preventDefault();alert('Please answer all questions: '+mi.join(', '));return;}
+ document.getElementById('time_taken').value=Math.min({{ seconds }},Math.floor((Date.now()-start)/1000));
+});
+</script>
+{% endblock %}

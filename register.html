@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block content %}
+<div class="auth-card"><h1>{{ 'Create Faculty Account' if role=='faculty' else 'Create Student Account' }}</h1>
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="role" value="{{ role }}">
+<label>Full Name</label><input name="name" required>
+<label>Email</label><input name="email" type="email" required>
+<label>Password</label><input name="password" type="password" minlength="6" required>
+{% if role=='faculty' %}
+<label>Faculty sign-up key</label><input name="faculty_key" type="password" required>
+<p class="field-help">Ask your administrator for this key.</p>
+{% else %}
+<label>Class code <span class="muted">(optional)</span></label><input name="class_code" maxlength="12" placeholder="e.g. K7P2QX" style="text-transform:uppercase">
+<p class="field-help">Given by your faculty. Your self assessment and placement results will be visible to them. You can also join later.</p>
+{% endif %}
+<button>Register</button>
+</form><p><a href="{{ url_for('index') }}">Back to login</a></p></div>
+{% endblock %}

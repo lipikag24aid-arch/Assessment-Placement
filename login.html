@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block content %}
+<div class="auth-card">
+<h1>Wellness &amp; Placement Portal</h1><p class="muted" style="text-align:center">Self assessment first, then placement analysis.</p>
+<form method="post" action="{{ url_for('login') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Email</label><input name="email" type="email" required placeholder="you@example.com">
+<label>Password</label><input name="password" type="password" required>
+<button>Login</button>
+</form>
+<p>New student? <a href="{{ url_for('register') }}">Create an account</a><br>Faculty? <a href="{{ url_for('register', **{'as':'faculty'}) }}">Create a faculty account</a></p>
+<div class="demo"><b>Demo faculty:</b> faculty@wellness.local / faculty123<br><b>Admin:</b> admin@wellness.local / admin123</div>
+</div>
+{% endblock %}

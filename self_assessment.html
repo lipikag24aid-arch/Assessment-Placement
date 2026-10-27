@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">STEP 1 OF 2 · SELF ASSESSMENT</p><h1>Self Assessment</h1><p class="muted">{{ questions|length }} questions about the last two weeks. Suggested time: 7 minutes. Next you will continue to the placement analysis.{% if cls %} Class: <strong>{{ cls['name'] }}</strong>.{% else %} <a href="{{ url_for('join_class') }}">Join a class</a> so your faculty can see results.{% endif %}</p></div><div class="timer" id="timer">07:00</div></div>
+<div class="progress-wrap"><div id="progress" class="progress"></div></div><p id="progressText" class="muted">0 / {{ questions|length }} answered</p>
+<form id="assessmentForm" method="post" action="{{ url_for('submit_self_assessment') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<input type="hidden" name="time_taken" id="time_taken">
+{% for factor,q,opts in questions %}
+{% set qno = loop.index %}
+<div class="question card">
+<div class="qhead"><span>Question {{ loop.index }}</span><small>{{ factor }}</small></div>
+<h2>{{ q }}</h2>
+<div class="options">
+{% for opt in opts %}<label class="option"><input type="radio" name="q{{ qno }}" value="{{ loop.index0 }}"><span>{{ opt }}</span></label>{% endfor %}
+</div>
+{% if loop.last %}<p class="muted"><strong>Important:</strong> This is a safety screening item. Your response is not a diagnosis.</p>{% endif %}
+</div>
+{% endfor %}
+<button class="full">Submit &amp; continue to Placement Analysis</button>
+</form>
+<script>
+let seconds={{ seconds }}, total={{ questions|length }};
+const start=Date.now(), timer=document.getElementById('timer'), form=document.getElementById('assessmentForm');
+function tick(){let m=Math.floor(seconds/60),s=seconds%60;timer.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+ if(seconds<=0){document.getElementById('time_taken').value={{ seconds }};
+  const miss=[];for(let i=1;i<=total;i++){if(!document.querySelector('input[name=q'+i+']:checked'))miss.push(i);}
+  if(miss.length){timer.textContent='Time up';alert('Time is up. Please answer the remaining questions: '+miss.join(', '));}else{form.requestSubmit();}
+  clearInterval(iv);}else seconds--;}
+const iv=setInterval(tick,1000);tick();
+document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',()=>{
+ const a=new Set([...document.querySelectorAll('input[type=radio]:checked')].map(x=>x.name)).size;
+ document.getElementById('progress').style.width=(a/total*100)+'%';
+ document.getElementById('progressText').textContent=a+' / '+total+' answered';
+}));
+form.addEventListener('submit',(e)=>{
+ const miss=[];for(let i=1;i<=total;i++){if(!document.querySelector('input[name=q'+i+']:checked'))miss.push(i);}
+ if(miss.length){e.preventDefault();alert('Please answer all questions: '+miss.join(', '));return;}
+ document.getElementById('time_taken').value=Math.min({{ seconds }},Math.floor((Date.now()-start)/1000));
+});
+</script>
+{% endblock %}

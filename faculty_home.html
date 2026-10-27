@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">FACULTY</p><h1>Your classes</h1><p class="muted">Create a class, share its code, and watch results arrive on the class dashboard.</p></div></div>
+<div class="card" style="margin-bottom:20px"><h2>Create a class</h2>
+<form method="post" class="compare-form" style="grid-template-columns:1fr auto">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div><label for="class_name">Class name</label><input id="class_name" name="class_name" maxlength="80" required placeholder="e.g. CSE-A Final Year 2026"></div>
+<button>Create &amp; get code</button></form></div>
+{% if cards %}
+<div class="grid two">
+{% for x in cards %}
+<a class="card class-card" href="{{ url_for('faculty_class',class_id=x.c['id']) }}">
+<p class="eyebrow">{{ x.c['created_at'][:10] }}{% if me['role']=='admin' %} · {{ x.c['faculty_name'] }}{% endif %}</p>
+<h2>{{ x.c['name'] }}</h2>
+<div class="code-pill">{{ x.c['code'] }}</div>
+<p class="muted">{{ x.s['students'] }} student(s) · self assessment {{ x.s['self_done'] }} · placement {{ x.s['placement_done'] }}</p>
+<p>Avg wellness <strong>{{ x.s['avg_wellness'] if x.s['avg_wellness'] is not none else '--' }}{% if x.s['avg_wellness'] is not none %}%{% endif %}</strong> · Avg placement <strong>{{ x.s['avg_placement'] if x.s['avg_placement'] is not none else '--' }}{% if x.s['avg_placement'] is not none %}%{% endif %}</strong></p>
+</a>
+{% endfor %}
+</div>
+{% else %}<div class="card"><p>No classes yet. Create one above.</p></div>{% endif %}
+{% endblock %}

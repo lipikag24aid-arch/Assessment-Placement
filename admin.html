@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">ADMIN</p><h1>System Overview</h1></div><a class="button" href="{{ url_for('faculty_home') }}">All classes</a></div>
+<div class="grid three">
+{% for label,key in [('Students','students'),('Faculty','faculty'),('Classes','classes'),('Self assessments','self'),('Placement assessments','placement')] %}
+<div class="card stat"><span>{{ label }}</span><strong>{{ stats[key] }}</strong></div>{% endfor %}
+</div>
+<div class="card"><h2>Recent placement assessments</h2><table><tr><th>Student</th><th>Email</th><th>Date</th><th>Score</th><th>Readiness</th></tr>{% for a in recent %}<tr><td>{{ a['name'] }}</td><td>{{ a['email'] }}</td><td>{{ a['created_at'][:16].replace('T',' ') }}</td><td>{{ a['score_percent'] }}%</td><td>{{ a['level'] }}</td></tr>{% endfor %}</table></div>
+{% endblock %}

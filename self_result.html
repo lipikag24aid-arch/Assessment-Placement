@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">SELF ASSESSMENT RESULT</p><h1>Your Self Assessment</h1><p class="muted">{{ a['created_at'][:19].replace('T',' ') }} · {{ a['time_taken']//60 }}m {{ a['time_taken']%60 }}s</p></div>
+<div class="actions"><a class="button" href="{{ url_for('download',kind='self',aid=a['id']) }}">Download PDF</a><a class="button secondary" href="{{ url_for('send_report',kind='self',aid=a['id']) }}">Send Report</a></div></div>
+{% if a['safety_flag'] %}
+<div class="card" style="border-left:4px solid #b42318;margin-bottom:16px"><h2>Safety Notice</h2><p>Your answer to the last question was not "Not at all". This is not a diagnosis, but it matters. If you may be in immediate danger or might hurt yourself, contact local emergency services, a trusted person, or a qualified mental-health professional now.</p></div>
+{% endif %}
+<div class="grid three">
+<div class="card stat"><span>Wellness Score</span><strong>{{ a['wellness_percent'] }}%</strong></div>
+<div class="card stat"><span>Screening Indicator</span><strong>{{ a['risk_percent'] }}%</strong></div>
+<div class="card stat"><span>Level</span><strong>{{ a['level'] }}</strong></div>
+</div>
+<div class="grid two">
+<div class="card chart-card"><h2>Factor Analysis</h2><canvas id="factorChart"></canvas></div>
+<div class="card"><h2>Suggestions</h2>{% for f,t in tips %}<div class="suggestion"><b>{{ f }}</b><p>{{ t }}</p></div>{% endfor %}</div>
+</div>
+<div class="card"><h2>Responses</h2><table><tr><th>#</th><th>Factor</th><th>Response</th><th>Score</th></tr>{% for x in answers %}<tr><td>{{ x['question_no'] }}</td><td>{{ x['factor'] }}</td><td>{{ x['answer'] }}</td><td>{{ x['score'] }}</td></tr>{% endfor %}</table></div>
+<div class="actions"><a class="button" href="{{ url_for('placement_home') }}">Go to Placement Analysis</a><a class="button secondary" href="{{ url_for('self_assessment') }}">Retake</a></div>
+<script>
+new Chart(document.getElementById('factorChart'),{type:'radar',data:{labels:{{ factors.keys()|list|tojson }},datasets:[{label:'Score (0–3, lower is better)',data:{{ factors.values()|list|tojson }}}]},options:{scales:{r:{min:0,max:3,ticks:{stepSize:1}}}}});
+</script>
+{% endblock %}

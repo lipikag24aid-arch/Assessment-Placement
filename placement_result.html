@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">PLACEMENT RESULT</p><h1>Your Placement Analysis</h1><p class="muted">{{ a['created_at'][:19].replace('T',' ') }} · {{ a['time_taken']//60 }}m {{ a['time_taken']%60 }}s · Coding: {{ language_name }}</p></div>
+<div class="actions"><a class="button" href="{{ url_for('download',kind='placement',aid=a['id']) }}">Download PDF</a><a class="button secondary" href="{{ url_for('send_report',kind='placement',aid=a['id']) }}">Send Report</a></div></div>
+<div class="grid three">
+<div class="card stat"><span>Score</span><strong>{{ a['score_percent'] }}%</strong></div>
+<div class="card stat"><span>Correct Answers</span><strong>{{ correct }} / {{ total }}</strong></div>
+<div class="card stat"><span>Readiness</span><strong>{{ a['level'] }}</strong></div>
+</div>
+{% if w %}<div class="card" style="margin-bottom:18px"><b>Self Assessment:</b> wellness {{ w['wellness_percent'] }}% · {{ w['level'] }} · <a href="{{ url_for('self_result',aid=w['id']) }}">view</a></div>{% endif %}
+<div class="grid two">
+<div class="card chart-card"><h2>Stage Analysis</h2><canvas id="stageChart"></canvas></div>
+<div class="card"><h2>Practice Recommendations</h2>{% for stage,score,tip in tips %}<div class="suggestion"><b>{{ stage }} · {{ score }}%</b><p>{{ tip }}</p></div>{% endfor %}</div>
+</div>
+<div class="card"><h2>Responses</h2><table><tr><th>#</th><th>Question</th><th>Stage</th><th>Your Answer</th><th>Correct Answer</th><th>Result</th></tr>{% for x in answers %}<tr><td>{{ x['question_no'] }}</td><td>{{ x['question'] }}</td><td>{{ x['factor'] }}</td><td>{{ x['answer'] }}</td><td>{{ x['correct_answer'] }}</td><td>{{ 'Correct' if x['score'] else 'Review' }}</td></tr>{% endfor %}</table></div>
+<div class="actions"><a class="button secondary" href="{{ url_for('placement_home') }}">Retake</a></div>
+<script>
+new Chart(document.getElementById('stageChart'),{type:'bar',data:{labels:{{ stages.keys()|list|tojson }},datasets:[{label:'Accuracy (%)',data:{{ stages.values()|list|tojson }},backgroundColor:'#2563eb'}]},options:{scales:{y:{min:0,max:100,ticks:{stepSize:20}}}}});
+</script>
+{% endblock %}

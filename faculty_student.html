@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">STUDENT · {{ c['name'] }}</p><h1>{{ st['name'] }}</h1><p class="muted">{{ st['email'] }}</p></div>
+<a class="button secondary" href="{{ url_for('faculty_class',class_id=c['id']) }}">Back to class</a></div>
+<div class="grid two">
+<div class="card"><p class="eyebrow">SELF ASSESSMENT</p>
+{% if w %}
+<div class="grid two" style="margin:0"><div class="stat"><span>Wellness</span><strong>{{ w['wellness_percent'] }}%</strong></div><div class="stat"><span>Level</span><strong>{{ w['level'] }}</strong></div></div>
+<p class="muted">{{ w['created_at'][:16].replace('T',' ') }}</p>
+{% if w['safety_flag'] %}<div class="suggestion" style="border-left-color:#b42318"><b>Suggested follow-up</b><p>This student gave a non-zero answer to the safety question. Please check in privately and kindly, and point them to your institution's counselling or emergency support. This is a prompt, not a diagnosis.</p></div>{% endif %}
+<canvas id="factorChart" height="260"></canvas>
+{% else %}<p>Not taken yet.</p>{% endif %}</div>
+<div class="card"><p class="eyebrow">PLACEMENT ANALYSIS</p>
+{% if p %}
+<div class="grid two" style="margin:0"><div class="stat"><span>Score</span><strong>{{ p['score_percent'] }}%</strong></div><div class="stat"><span>Readiness</span><strong>{{ p['level'] }}</strong></div></div>
+<p class="muted">{{ p['created_at'][:16].replace('T',' ') }} · {{ p['total_score'] }}/50 correct · {{ p['time_taken']//60 }}m {{ p['time_taken']%60 }}s</p>
+<canvas id="stageChart" height="260"></canvas>
+{% else %}<p>Not taken yet.</p>{% endif %}</div>
+</div>
+<script>
+{% if w %}new Chart(document.getElementById('factorChart'),{type:'radar',data:{labels:{{ factors.keys()|list|tojson }},datasets:[{label:'Score (0–3, lower is better)',data:{{ factors.values()|list|tojson }}}]},options:{scales:{r:{min:0,max:3,ticks:{stepSize:1}}}}});{% endif %}
+{% if p %}new Chart(document.getElementById('stageChart'),{type:'bar',data:{labels:{{ stages.keys()|list|tojson }},datasets:[{label:'Accuracy (%)',data:{{ stages.values()|list|tojson }},backgroundColor:'#2563eb'}]},options:{scales:{y:{min:0,max:100}}}});{% endif %}
+</script>
+{% endblock %}

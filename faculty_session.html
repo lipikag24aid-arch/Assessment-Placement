@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<div class="card" style="text-align:center;max-width:560px;margin:auto">
+<p class="eyebrow">CLASS SESSION</p><h1>{{ c['name'] }}</h1>
+{% if live %}
+<img src="{{ url_for('session_qr',class_id=c['id'],sid=ss['id']) }}" alt="QR code to join {{ c['name'] }}" style="width:min(80vw,380px);image-rendering:pixelated">
+<p>Scan with your phone camera to join this class.</p>
+<p class="muted small" style="word-break:break-all">{{ join_url }}</p>
+<p><b>Expires in <span id="left">--:--</span></b> &nbsp;&middot;&nbsp; <b id="count">{{ joined|length }}</b> joined</p>
+<div class="actions">
+<a class="button" href="{{ url_for('session_qr',class_id=c['id'],sid=ss['id'],download=1) }}">Download PNG</a>
+<form method="post" action="{{ url_for('session_end',class_id=c['id'],sid=ss['id']) }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>End session</button></form>
+<form method="post" action="{{ url_for('session_start',class_id=c['id']) }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>New QR code</button></form>
+</div>
+{% else %}
+<p class="muted">This session has ended or expired, so its QR code no longer works.</p>
+<form method="post" action="{{ url_for('session_start',class_id=c['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Start a new session</button></form>
+{% endif %}
+<p><a href="{{ url_for('faculty_class',class_id=c['id']) }}">Back to class dashboard</a></p>
+{% if joined %}<details open><summary>Joined this session ({{ joined|length }})</summary><ul style="text-align:left">{% for j in joined %}<li>{{ j['name'] }} <span class="muted small">{{ j['joined_at'][11:16] }}</span></li>{% endfor %}</ul></details>{% endif %}
+</div>
+{% if live %}<script>
+const end={{ expires_ms }};
+function tick(){const s=Math.max(0,Math.round((end-Date.now())/1000));document.getElementById('left').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(s===0)location.reload();}
+tick();setInterval(tick,1000);setTimeout(()=>location.reload(),20000);
+</script>{% endif %}
+{% endblock %}

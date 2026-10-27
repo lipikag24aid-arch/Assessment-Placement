@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">HISTORY</p><h1>Your attempts</h1></div></div>
+<div class="card"><h2>Self Assessments</h2><table><tr><th>Date</th><th>Wellness</th><th>Level</th><th></th></tr>{% for a in w %}<tr><td>{{ a['created_at'][:16].replace('T',' ') }}</td><td>{{ a['wellness_percent'] }}%</td><td>{{ a['level'] }}</td><td><a href="{{ url_for('self_result',aid=a['id']) }}">View</a> · <a href="{{ url_for('download',kind='self',aid=a['id']) }}">PDF</a></td></tr>{% else %}<tr><td colspan="4">None yet.</td></tr>{% endfor %}</table></div>
+<div class="card"><h2>Placement Assessments</h2><table><tr><th>Date</th><th>Language</th><th>Score</th><th>Readiness</th><th></th></tr>{% for a in p %}<tr><td>{{ a['created_at'][:16].replace('T',' ') }}</td><td>{{ a['language']|upper if a['language']!='cpp' else 'C++' }}</td><td>{{ a['score_percent'] }}%</td><td>{{ a['level'] }}</td><td><a href="{{ url_for('placement_result',aid=a['id']) }}">View</a> · <a href="{{ url_for('download',kind='placement',aid=a['id']) }}">PDF</a></td></tr>{% else %}<tr><td colspan="5">None yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

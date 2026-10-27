@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">MY RESULTS</p><h1>Welcome, {{ me['name'] }}</h1><p class="muted">{% if cls %}Class: <strong>{{ cls['name'] }}</strong>{% else %}You are not in a class yet. <a href="{{ url_for('join_class') }}">Join with a class code</a>.{% endif %}</p></div>
+<a class="button" href="{{ url_for('self_assessment') }}">Take the assessments</a></div>
+<div class="grid two">
+<div class="card"><p class="eyebrow">SELF ASSESSMENT</p>{% if w %}<div class="grid two" style="margin:0"><div class="stat"><span>Wellness</span><strong>{{ w['wellness_percent'] }}%</strong></div><div class="stat"><span>Level</span><strong>{{ w['level'] }}</strong></div></div><p><a href="{{ url_for('self_result',aid=w['id']) }}">View report</a></p>{% else %}<p>Not taken yet.</p><a class="button" href="{{ url_for('self_assessment') }}">Start</a>{% endif %}</div>
+<div class="card"><p class="eyebrow">PLACEMENT ANALYSIS</p>{% if p %}<div class="grid two" style="margin:0"><div class="stat"><span>Score</span><strong>{{ p['score_percent'] }}%</strong></div><div class="stat"><span>Readiness</span><strong>{{ p['level'] }}</strong></div></div><p><a href="{{ url_for('placement_result',aid=p['id']) }}">View report</a></p>{% else %}<p>Not taken yet.</p><a class="button" href="{{ url_for('placement_home') }}">Start</a>{% endif %}</div>
+</div>
+<div class="card"><h2>Daily Check-ins</h2>{% if checkins %}<table><tr><th>Date</th><th>Mood</th><th>Stress</th></tr>{% for c in checkins %}<tr><td>{{ c['created_at'][:10] }}</td><td>{{ c['mood'] }}/5</td><td>{{ c['stress'] }}/5</td></tr>{% endfor %}</table>{% else %}<p>No check-ins yet.</p>{% endif %}</div>
+{% endblock %}

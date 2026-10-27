@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<div class="hero"><div><p class="eyebrow">STEP 2 OF 2 · PLACEMENT ANALYSIS</p><h1>Placement Analysis</h1><p class="muted">50 questions across Aptitude, Coding, Technical Interview and Group Discussion. Choose the language for the coding section. Time limit: 60 minutes.</p></div></div>
+<div class="grid three lang-grid">
+{% for slug,name in langs %}
+<a class="card lang-card" href="{{ url_for('placement_quiz', language=slug) }}"><h2>{{ name }}</h2><p class="muted">Start the placement assessment with {{ name }} coding questions.</p><span class="button">Start with {{ name }}</span></a>
+{% endfor %}
+</div>
+{% endblock %}

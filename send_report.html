@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block content %}
+<div class="card narrow">
+<p class="eyebrow">EMAIL REPORT</p>
+<h1>Send {{ label }} Report</h1>
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>From Email</label><input type="email" name="from_email" value="{{ me['email'] }}" required>
+<p class="field-help">The configured SMTP account sends the message. If this address differs, it is used as Reply-To.</p>
+<label>To Email</label><input type="email" name="to_email" placeholder="recipient@example.com" required>
+<label>Subject</label><input type="text" name="subject" value="{{ label }} Report #{{ aid }}" required>
+<button type="submit">Send Report</button>
+</form>
+<div class="email-note"><b>Attachment:</b> the PDF report is attached automatically. <a href="{{ back }}">Back</a></div>
+</div>
+{% endblock %}
